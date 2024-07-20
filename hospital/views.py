@@ -70,7 +70,7 @@ class ContactView(TemplateView):
         message = request.POST.get('message')
 
         if subject == '':
-            subject = "healthcare Contact"
+            subject = "heartcare Contact"
 
         if name and message and email and phone:
             send_mail(
