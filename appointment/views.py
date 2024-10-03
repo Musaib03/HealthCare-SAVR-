@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from hospital.models import Doctor
 from .models import Appointment
-
+from django.core.mail import send_mail
+from django.conf import settings
 
 class AppointmentView(View):
     def get(self, request, *args, **kwargs):
@@ -23,8 +24,29 @@ class AppointmentView(View):
         if doctor_id:
             doctor = get_object_or_404(Doctor, id=doctor_id)
 
-        if(name and phone and email and doctor and date and time):
+        if name and phone and email and doctor and date and time:
             Appointment.objects.create(
-                name=name, phone=phone, email=email, doctor=doctor, date=date, time=time, note=note)
-            messages.success(request,'Appointment done successfully')
+                name=name, phone=phone, email=email, doctor=doctor, date=date, time=time, note=note
+            )
+            messages.success(request, 'Appointment done successfully')
+
+            # Send email
+            subject = 'Appointment Confirmation'
+            message = f"""
+            Dear {name},
+
+            Your appointment with Dr. {doctor.name} is confirmed for {date} at {time}.
+            Additional notes: {note}
+
+            Thank you,
+            The Hospital Team
+            """
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
+            
         return redirect('appointment')
